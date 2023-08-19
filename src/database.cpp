@@ -29,7 +29,7 @@ std::string Database::insert(const std::string &key, const std::string &value) {
 
   records[key] = value;
 
-  return "INSERT\n";
+  return "INSERT";
 }
 
 std::string Database::find(const std::string& key) {
@@ -71,7 +71,6 @@ std::string Database::findAll() {
 
   output.append("----\n");
   output.append(std::to_string(records.size()));
-  output.append("\n");
 
   return output;
 }
@@ -134,7 +133,7 @@ std::string Database::update(const std::string& key, const std::string &value) {
   std::remove(DATABASE_FILENAME.c_str());
   std::rename("temp.txt", DATABASE_FILENAME.c_str());
 
-  return "UPDATE\n";
+  return "UPDATE";
 }
 
 std::ifstream Database::openFileForReading(const std::string& filename) {

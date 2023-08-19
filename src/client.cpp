@@ -1,21 +1,8 @@
 #include <iostream>
 #include <asio.hpp>
+#include <boost/algorithm/string.hpp>
 
-int main(int argc, char **argv) {
-  std::string command;
-
-  if (argc > 1) { // Check if there are command-line arguments
-    // Start from argv[1] to skip the program name (argv[0])
-    for (int i = 1; i < argc; ++i) {
-      command += argv[i];
-      if (i < argc - 1) {
-        command += " "; // Add space between arguments
-      }
-    }
-  } else {
-    throw std::runtime_error("No command provided.");
-  }
-
+void send(std::string const &command) {
   asio::io_context io_context;
   asio::ip::tcp::socket socket(io_context);
 
@@ -23,10 +10,19 @@ int main(int argc, char **argv) {
   socket.connect(endpoint);
 
   asio::write(socket, asio::buffer(command));
+
   char buffer[1024];
   std::size_t bytes_received = socket.read_some(asio::buffer(buffer, sizeof(buffer)));
 
-  std::cout << std::string(buffer, bytes_received) << std::endl;
+  std::cout << "\n" << std::string(buffer, bytes_received) << std::endl;
+}
+
+int main(int argc, char **argv) {
+  for (std::string command; std::cout << "smalltable > " && std::getline(std::cin, command);) {
+    boost::trim(command);
+    if (command == "exit") break;
+    if (!command.empty()) send(command);
+  }
 
   return 0;
 }

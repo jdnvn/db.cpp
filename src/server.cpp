@@ -39,16 +39,16 @@ int main() {
         if (args.size() != 3) throw std::runtime_error("Error: INSERT requires 2 arguments");
         response = db.insert(args[1], args[2]);
       } else if (args[0] == "FIND") {
-        if (args.size() != 2) throw std::runtime_error("Error: INSERT requires 1 argument");
+        if (args.size() != 2) throw std::runtime_error("Error: FIND requires 1 argument");
         response = db.find(args[1]);
       } else if (args[0] == "REMOVE") {
-        if (args.size() != 2) throw std::runtime_error("Error: INSERT requires 1 argument");
+        if (args.size() != 2) throw std::runtime_error("Error: REMOVE requires 1 argument");
         response = db.remove(args[1]);
       } else if (args[0] == "UPDATE") {
-        if (args.size() != 3) throw std::runtime_error("Error: INSERT requires 2 arguments");
+        if (args.size() != 3) throw std::runtime_error("Error: UPDATE requires 2 arguments");
         response = db.update(args[1], args[2]);
       } else {
-        response = "Invalid command";
+        response = "Error: Invalid command";
       }
 
       asio::write(socket, asio::buffer(response));
