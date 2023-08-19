@@ -1,0 +1,6 @@
+.vscode
+database.txt
+database.dSYM/*
+*.o
+**/server
+**/smalltable
