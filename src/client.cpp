@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
       }
     }
   } else {
-    throw std::runtime_error("No command provided");
+    throw std::runtime_error("No command provided.");
   }
 
   asio::io_context io_context;
