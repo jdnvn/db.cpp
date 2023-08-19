@@ -3,8 +3,18 @@
 #include <string>
 #include "database.h"
 
+std::unordered_map<std::string, std::string> records;
+
 Database::Database() : DATABASE_FILENAME("database.txt") {
   std::cout << "Database created\n";
+
+  // store records in memory
+  std::ifstream db = openDbForReading();
+  Record record;
+  while (db >> record.key >> record.value) {
+    records[record.key] = record.value;
+  }
+  db.close();
 }
 
 Database::~Database() {
@@ -16,43 +26,51 @@ std::string Database::insert(const std::string &key, const std::string &value) {
   Record newRecord = {key, value};
   db << newRecord.toString();
   db.close();
+
+  records[key] = value;
+
   return "INSERT\n";
 }
 
 std::string Database::find(const std::string& key) {
-  std::ifstream db = openDbForReading();
   Record record;
-  bool found = false;
+  record.key = key;
 
-  while (db >> record.key >> record.value) {
-    if (record.key.compare(key) == 0) {
-      found = true;
-      break;
+  try {
+    record.value = records.at(key);
+    std::cout << "Found record in memory\n";
+  } catch (const std::out_of_range &e) {
+    std::ifstream db = openDbForReading();
+    bool found = false;
+
+    while (db >> record.key >> record.value) {
+      if (record.key.compare(key) == 0) {
+        found = true;
+        break;
+      }
     }
+
+    db.close();
+
+    if (!found) throw std::runtime_error("Error: Record not found");
+    records[key] = record.value;
   }
-
-  db.close();
-
-  if (!found) throw std::runtime_error("Error: Record not found");
 
   return record.value;
 }
 
 std::string Database::findAll() {
-  std::ifstream db = openDbForReading();
   Record record;
-  int numRecords = 0;
 
   std::string output = "";
-  while (db >> record.key >> record.value) {
+  for (const auto &pair : records) {
+    record.key = pair.first;
+    record.value = pair.second;
     output.append(record.toString());
-    numRecords += 1;
   }
 
-  db.close();
-
-  output.append("\n----\n");
-  output.append(std::to_string(numRecords));
+  output.append("----\n");
+  output.append(std::to_string(records.size()));
   output.append("\n");
 
   return output;
@@ -63,6 +81,8 @@ std::string Database::remove(const std::string& key) {
   std::ofstream tempDb = openFileForWriting("temp.txt");
   bool removed = false;
   Record record;
+
+  records.erase(key);
 
   while (db >> record.key >> record.value) {
     if(record.key == key) {
@@ -92,6 +112,9 @@ std::string Database::update(const std::string& key, const std::string &value) {
   Record record;
   bool found = false;
 
+  records[key] = value;
+
+  // can this be done in the background?
   while (db >> record.key >> record.value) {
     if (record.key == key) {
       found = true;

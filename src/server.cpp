@@ -56,6 +56,7 @@ int main() {
       std::cerr << "Error: " << e.what() << std::endl;
       asio::write(socket, asio::buffer(std::string(e.what())));
     }
+
     memset(data, 0, 1024);
     socket.close();
   }
