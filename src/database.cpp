@@ -43,7 +43,7 @@ void insert(const Record& record) {
   std::cout << "INSERT\n";
 }
 
-Record find(const int& id) {
+void find(const int& id) {
   std::ifstream db = openDbForReading();
   Record record;
   bool found = false;
@@ -59,10 +59,10 @@ Record find(const int& id) {
 
   if (!found) throw std::runtime_error("Error: Record not found");
 
-  return record;
+  std::cout << record.toString();
 }
 
-void readAll() {
+void findAll() {
   std::ifstream db = openDbForReading();
   Record record;
   int numRecords = 0;
@@ -104,8 +104,8 @@ void remove(const int& id) {
 void update(const int& id, const std::string& value) {
   std::ifstream db = openDbForReading();
   std::ofstream tempDb = openFileForWriting("temp.txt");
-  bool found = false;
   Record record;
+  bool found = false;
 
   while (db >> record.id >> record.value) {
     if (record.id == id) {
@@ -129,7 +129,7 @@ void update(const int& id, const std::string& value) {
 }
 
 int main() {
-  readAll();
+  findAll();
 
   return 0;
 }
