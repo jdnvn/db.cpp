@@ -15,51 +15,49 @@ int main() {
   while (true) {
     asio::ip::tcp::socket socket(io_context);
     acceptor.accept(socket);
+    char data[1024];
 
     try {
-      char data[1024];
       std::size_t bytes_read = socket.read_some(asio::buffer(data, sizeof(data)));
 
       if (bytes_read == 0) throw std::runtime_error("No bytes read");
 
+      // parse arguments
       std::istringstream iss(data);
-      std::string command;
+      std::string str;
+      std::vector<std::string> args;
+      while (getline(iss, str, ' ')) {
+        args.push_back(str);
+      }
+      iss.clear();
 
-
-      iss >> command;
-
+      // match and execute command
       std::string response;
-      if (command == "FINDALL") {
+      if (args[0] == "FINDALL") {
         response = db.findAll();
-      } else if (command == "INSERT") {
-        std::string key;
-        std::string value;
-        iss >> key >> value;
-        response = db.insert(key, value);
-      } else if (command == "FIND") {
-        std::string key;
-        iss >> key;
-        response = db.find(key);
-      } else if (command == "REMOVE") {
-        std::string key;
-        iss >> key;
-        response = db.remove(key);
-      } else if (command == "UPDATE") {
-        std::string key;
-        std::string value;
-        iss >> key >> value;
-        response = db.update(key, value);
+      } else if (args[0] == "INSERT") {
+        if (args.size() != 3) throw std::runtime_error("Error: INSERT requires 2 arguments");
+        response = db.insert(args[1], args[2]);
+      } else if (args[0] == "FIND") {
+        if (args.size() != 2) throw std::runtime_error("Error: INSERT requires 1 argument");
+        response = db.find(args[1]);
+      } else if (args[0] == "REMOVE") {
+        if (args.size() != 2) throw std::runtime_error("Error: INSERT requires 1 argument");
+        response = db.remove(args[1]);
+      } else if (args[0] == "UPDATE") {
+        if (args.size() != 3) throw std::runtime_error("Error: INSERT requires 2 arguments");
+        response = db.update(args[1], args[2]);
       } else {
         response = "Invalid command";
       }
 
       asio::write(socket, asio::buffer(response));
-
-      socket.close();
     } catch (const std::exception &e) {
       std::cerr << "Error: " << e.what() << std::endl;
-      socket.close();
+      asio::write(socket, asio::buffer(std::string(e.what())));
     }
+    memset(data, 0, 1024);
+    socket.close();
   }
 
   return 0;
