@@ -5,8 +5,8 @@
 
 std::unordered_map<std::string, std::string> records;
 
-Database::Database() : DATABASE_FILENAME("database.txt") {
-  std::cout << "Database created\n";
+Database::Database() : DATABASE_FILENAME("../database.txt") {
+  std::cout << "Database created!!!!\n";
 
   // store records in memory
   std::ifstream db = openDbForReading();
