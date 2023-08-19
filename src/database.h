@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <unordered_map>
 #include <string>
 
 class Database {
@@ -24,6 +25,7 @@ private:
       return key + " " + value + "\n";
     }
   };
+  std::unordered_map<std::string, std::string> records;
   std::ifstream openFileForReading(const std::string &filename);
   std::ofstream openFileForWriting(const std::string &filename);
   std::ifstream openDbForReading();
