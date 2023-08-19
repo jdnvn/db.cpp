@@ -2,7 +2,19 @@
 #include <asio.hpp>
 
 int main(int argc, char **argv) {
-  std::string command = argv[1];
+  std::string command;
+
+  if (argc > 1) { // Check if there are command-line arguments
+    // Start from argv[1] to skip the program name (argv[0])
+    for (int i = 1; i < argc; ++i) {
+      command += argv[i];
+      if (i < argc - 1) {
+        command += " "; // Add space between arguments
+      }
+    }
+  } else {
+    throw std::runtime_error("No command provided");
+  }
 
   asio::io_context io_context;
   asio::ip::tcp::socket socket(io_context);
@@ -14,7 +26,7 @@ int main(int argc, char **argv) {
   char buffer[1024];
   std::size_t bytes_received = socket.read_some(asio::buffer(buffer, sizeof(buffer)));
 
-  std::cout << "Received: " << std::string(buffer, bytes_received) << std::endl;
+  std::cout << std::string(buffer, bytes_received) << std::endl;
 
   return 0;
 }
