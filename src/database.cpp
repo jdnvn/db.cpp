@@ -82,7 +82,6 @@ void Database::removeRecordFromFile(const std::string& key) {
   std::ofstream tempDb = openFileForWriting("temp.txt");
   bool removed = false;
   Record record;
-  std::cout << "in removeFromFile" << std::endl;
 
   while (db >> record.key >> record.value) {
     if(record.key == key) {
@@ -91,7 +90,7 @@ void Database::removeRecordFromFile(const std::string& key) {
       tempDb << record.toString();
     }
   }
-  std::cout << "in removeFromFile" << std::endl;
+
   db.close();
   tempDb.close();
 
@@ -99,7 +98,7 @@ void Database::removeRecordFromFile(const std::string& key) {
     std::remove("temp.txt");
     throw std::runtime_error("error: could not remove record");
   }
-  std::cout << "in removeFromFile" << std::endl;
+
   std::remove(DATABASE_FILENAME.c_str());
   std::rename("temp.txt", DATABASE_FILENAME.c_str());
 }
