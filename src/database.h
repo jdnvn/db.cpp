@@ -26,6 +26,9 @@ private:
     }
   };
   std::unordered_map<std::string, std::string> records;
+  void writeRecordToFile(const Record &record);
+  void updateRecordInFile(const std::string& key, const std::string& value);
+  void removeRecordFromFile(const std::string& key);
   std::ifstream openFileForReading(const std::string &filename);
   std::ofstream openFileForWriting(const std::string &filename);
   std::ifstream openDbForReading();

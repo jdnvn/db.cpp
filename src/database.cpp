@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "database.h"
+#include <future>
 
 std::unordered_map<std::string, std::string> records;
 
@@ -18,11 +19,16 @@ Database::Database() : DATABASE_FILENAME("../database.txt") {
 
 Database::~Database() {}
 
-std::string Database::insert(const std::string &key, const std::string &value) {
+void Database::writeRecordToFile(const Record &record) {
   std::ofstream db = openDbForWriting();
-  Record newRecord = {key, value};
-  db << newRecord.toString();
+  db << record.toString();
   db.close();
+}
+
+std::string Database::insert(const std::string &key, const std::string &value) {
+  Record newRecord = {key, value};
+
+  std::async([this, newRecord]() { writeRecordToFile(newRecord); });
 
   records[key] = value;
 
@@ -71,13 +77,12 @@ std::string Database::findAll() {
   return output;
 }
 
-std::string Database::remove(const std::string& key) {
+void Database::removeRecordFromFile(const std::string& key) {
   std::ifstream db = openDbForReading();
   std::ofstream tempDb = openFileForWriting("temp.txt");
   bool removed = false;
   Record record;
-
-  records.erase(key);
+  std::cout << "in removeFromFile" << std::endl;
 
   while (db >> record.key >> record.value) {
     if(record.key == key) {
@@ -86,7 +91,7 @@ std::string Database::remove(const std::string& key) {
       tempDb << record.toString();
     }
   }
-
+  std::cout << "in removeFromFile" << std::endl;
   db.close();
   tempDb.close();
 
@@ -94,22 +99,33 @@ std::string Database::remove(const std::string& key) {
     std::remove("temp.txt");
     throw std::runtime_error("error: could not remove record");
   }
-
+  std::cout << "in removeFromFile" << std::endl;
   std::remove(DATABASE_FILENAME.c_str());
   std::rename("temp.txt", DATABASE_FILENAME.c_str());
+}
+
+std::string Database::remove(const std::string& key) {
+  try {
+    find(key);
+  } catch (const std::exception &e) {
+    return "error: record not found";
+  }
+
+  records.erase(key);
+
+  std::async([this, key]() { removeRecordFromFile(key); });
+
+  std::cout << "after async" << std::endl;
 
   return "REMOVE";
 }
 
-std::string Database::update(const std::string& key, const std::string &value) {
+void Database::updateRecordInFile(const std::string& key, const std::string& value) {
   std::ifstream db = openDbForReading();
   std::ofstream tempDb = openFileForWriting("temp.txt");
   Record record;
   bool found = false;
 
-  records[key] = value;
-
-  // can this be done in the background?
   while (db >> record.key >> record.value) {
     if (record.key == key) {
       found = true;
@@ -128,6 +144,17 @@ std::string Database::update(const std::string& key, const std::string &value) {
 
   std::remove(DATABASE_FILENAME.c_str());
   std::rename("temp.txt", DATABASE_FILENAME.c_str());
+}
+
+std::string Database::update(const std::string& key, const std::string& value) {
+  try {
+    find(key);
+  } catch (const std::exception &e) {
+    return "error: record not found";
+  }
+
+  std::async([this, key, value]() { updateRecordInFile(key, value); });
+  records[key] = value;
 
   return "UPDATE";
 }
