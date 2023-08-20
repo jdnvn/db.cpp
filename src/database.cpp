@@ -6,20 +6,17 @@
 std::unordered_map<std::string, std::string> records;
 
 Database::Database() : DATABASE_FILENAME("../database.txt") {
-  std::cout << "Database created!!!!\n";
-
-  // store records in memory
   std::ifstream db = openDbForReading();
   Record record;
+
   while (db >> record.key >> record.value) {
     records[record.key] = record.value;
   }
+
   db.close();
 }
 
-Database::~Database() {
-  std::cout << "Database destroyed\n";
-}
+Database::~Database() {}
 
 std::string Database::insert(const std::string &key, const std::string &value) {
   std::ofstream db = openDbForWriting();
@@ -38,7 +35,6 @@ std::string Database::find(const std::string& key) {
 
   try {
     record.value = records.at(key);
-    std::cout << "Found record in memory\n";
   } catch (const std::out_of_range &e) {
     std::ifstream db = openDbForReading();
     bool found = false;
@@ -52,7 +48,7 @@ std::string Database::find(const std::string& key) {
 
     db.close();
 
-    if (!found) throw std::runtime_error("Error: Record not found");
+    if (!found) throw std::runtime_error("error: record not found");
     records[key] = record.value;
   }
 
@@ -96,7 +92,7 @@ std::string Database::remove(const std::string& key) {
 
   if (!removed) {
     std::remove("temp.txt");
-    throw std::runtime_error("Error: Could not remove record");
+    throw std::runtime_error("error: could not remove record");
   }
 
   std::remove(DATABASE_FILENAME.c_str());
@@ -127,7 +123,7 @@ std::string Database::update(const std::string& key, const std::string &value) {
 
   if (!found) {
     std::remove("temp.txt");
-    throw std::runtime_error("Error: Could not update record");
+    throw std::runtime_error("error: could not update record");
   }
 
   std::remove(DATABASE_FILENAME.c_str());
@@ -139,7 +135,9 @@ std::string Database::update(const std::string& key, const std::string &value) {
 std::ifstream Database::openFileForReading(const std::string& filename) {
   std::ifstream inFile(filename);
   if (!inFile) {
-    std::cerr << "Error: cannot open file for reading: " << filename << "\n";
+    std::ofstream createFile(filename);
+    createFile.close();
+    std::ifstream inFile(filename);
   }
   return inFile;
 }
@@ -147,7 +145,7 @@ std::ifstream Database::openFileForReading(const std::string& filename) {
 std::ofstream Database::openFileForWriting(const std::string& filename) {
   std::ofstream outFile(filename, std::ios::app);
   if (!outFile) {
-    std::cerr << "Error: cannot open file for writing: " << filename << "\n";
+    std::cerr << "error: cannot open file for writing: " << filename << "\n";
   }
   return outFile;
 }
