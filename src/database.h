@@ -13,7 +13,7 @@ public:
   ~Database();
   std::string insert(const std::string &key, const std::string &value);
   std::string find(const std::string &key);
-  std::string findAll();
+  std::string all();
   std::string remove(const std::string &key);
   std::string update(const std::string &key, const std::string &value);
 private:

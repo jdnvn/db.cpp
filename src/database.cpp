@@ -19,20 +19,20 @@ Database::Database() : DATABASE_FILENAME("../database.txt") {
 
 Database::~Database() {}
 
-void Database::writeRecordToFile(const Record &record) {
-  std::ofstream db = openDbForWriting();
-  db << record.toString();
-  db.close();
-}
+std::string Database::all() {
+  Record record;
 
-std::string Database::insert(const std::string &key, const std::string &value) {
-  Record newRecord = {key, value};
+  std::string output = "";
+  for (const auto &pair : records) {
+    record.key = pair.first;
+    record.value = pair.second;
+    output.append(record.toString());
+  }
 
-  std::async([this, newRecord]() { writeRecordToFile(newRecord); });
+  output.append("----\n");
+  output.append(std::to_string(records.size()));
 
-  records[key] = value;
-
-  return "INSERT";
+  return output;
 }
 
 std::string Database::find(const std::string& key) {
@@ -61,20 +61,27 @@ std::string Database::find(const std::string& key) {
   return record.value;
 }
 
-std::string Database::findAll() {
-  Record record;
+void Database::writeRecordToFile(const Record &record) {
+  std::ofstream db = openDbForWriting();
+  db << record.toString();
+  db.close();
+}
 
-  std::string output = "";
-  for (const auto &pair : records) {
-    record.key = pair.first;
-    record.value = pair.second;
-    output.append(record.toString());
+std::string Database::insert(const std::string &key, const std::string &value) {
+  try {
+    find(key);
+    return "error: record already exists";
+  } catch (const std::exception &e) {
+    // intentionally swallows the error
   }
 
-  output.append("----\n");
-  output.append(std::to_string(records.size()));
+  Record newRecord = {key, value};
 
-  return output;
+  std::async([this, newRecord]() { writeRecordToFile(newRecord); });
+
+  records[key] = value;
+
+  return "INSERT";
 }
 
 void Database::removeRecordFromFile(const std::string& key) {

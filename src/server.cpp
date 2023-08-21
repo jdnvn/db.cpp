@@ -70,8 +70,8 @@ class Server {
     std::string executeCommand(const std::vector<std::string>& args) {
       std::string response;
 
-      if (boost::iequals(args[0], "FINDALL")) {
-        response = db.findAll();
+      if (boost::iequals(args[0], "ALL")) {
+        response = db.all();
       } else if (boost::iequals(args[0], "INSERT")) {
         if (args.size() != 3) throw std::runtime_error("error: INSERT requires 2 arguments");
         response = db.insert(args[1], args[2]);
