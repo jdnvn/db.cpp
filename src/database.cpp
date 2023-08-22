@@ -4,14 +4,14 @@
 #include "database.h"
 #include <future>
 
-std::unordered_map<std::string, std::string> records;
+std::unordered_map<std::string, std::string> records_;
 
 Database::Database() : DATABASE_FILENAME("../database.txt") {
   std::ifstream db = openDbForReading();
   Record record;
 
   while (db >> record.key >> record.value) {
-    records[record.key] = record.value;
+    records_[record.key] = record.value;
   }
 
   db.close();
@@ -23,14 +23,14 @@ std::string Database::all() {
   Record record;
 
   std::string output = "";
-  for (const auto &pair : records) {
+  for (const auto &pair : records_) {
     record.key = pair.first;
     record.value = pair.second;
     output.append(record.toString());
   }
 
   output.append("----\n");
-  output.append(std::to_string(records.size()));
+  output.append(std::to_string(records_.size()));
 
   return output;
 }
@@ -40,7 +40,7 @@ std::string Database::find(const std::string& key) {
   record.key = key;
 
   try {
-    record.value = records.at(key);
+    record.value = records_.at(key);
   } catch (const std::out_of_range &e) {
     std::ifstream db = openDbForReading();
     bool found = false;
@@ -55,7 +55,7 @@ std::string Database::find(const std::string& key) {
     db.close();
 
     if (!found) throw std::runtime_error("error: record not found");
-    records[key] = record.value;
+    records_[key] = record.value;
   }
 
   return record.value;
@@ -79,7 +79,7 @@ std::string Database::insert(const std::string &key, const std::string &value) {
 
   std::async([this, newRecord]() { writeRecordToFile(newRecord); });
 
-  records[key] = value;
+  records_[key] = value;
 
   return "INSERT";
 }
@@ -117,7 +117,7 @@ std::string Database::remove(const std::string& key) {
     return "error: record not found";
   }
 
-  records.erase(key);
+  records_.erase(key);
 
   std::async([this, key]() { removeRecordFromFile(key); });
 
@@ -160,7 +160,7 @@ std::string Database::update(const std::string& key, const std::string& value) {
   }
 
   std::async([this, key, value]() { updateRecordInFile(key, value); });
-  records[key] = value;
+  records_[key] = value;
 
   return "UPDATE";
 }

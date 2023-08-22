@@ -12,12 +12,12 @@ void send(std::string const &command, asio::ip::tcp::socket &socket) {
 }
 
 int main(int argc, char **argv) {
-  // open up a connection to the server
   asio::io_context io_context;
   asio::ip::tcp::socket socket(io_context);
+  unsigned short port = (argc >= 2) ? std::atoi(argv[1]) : 6969;
 
   try {
-    asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string("127.0.0.1"), 5433);
+    asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string("127.0.0.1"), port);
     socket.connect(endpoint);
 
     // listen for user input

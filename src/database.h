@@ -25,7 +25,7 @@ private:
       return key + " " + value + "\n";
     }
   };
-  std::unordered_map<std::string, std::string> records;
+  std::unordered_map<std::string, std::string> records_;
   void writeRecordToFile(const Record &record);
   void updateRecordInFile(const std::string& key, const std::string& value);
   void removeRecordFromFile(const std::string& key);
