@@ -8,7 +8,6 @@
 
 class Database {
 public:
-  const std::string DATABASE_FILENAME;
   Database();
   ~Database();
   std::string insert(const std::string &key, const std::string &value);
@@ -17,6 +16,7 @@ public:
   std::string remove(const std::string &key);
   std::string update(const std::string &key, const std::string &value);
 private:
+  const std::string DATABASE_FILENAME_;
   struct Record {
     std::string key;
     std::string value;
@@ -25,7 +25,7 @@ private:
       return key + " " + value + "\n";
     }
   };
-  std::unordered_map<std::string, std::string> records;
+  std::unordered_map<std::string, std::string> records_;
   void writeRecordToFile(const Record &record);
   void updateRecordInFile(const std::string& key, const std::string& value);
   void removeRecordFromFile(const std::string& key);

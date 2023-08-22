@@ -4,14 +4,14 @@
 #include "database.h"
 #include <future>
 
-std::unordered_map<std::string, std::string> records;
+std::unordered_map<std::string, std::string> records_;
 
-Database::Database() : DATABASE_FILENAME("../database.txt") {
+Database::Database() : DATABASE_FILENAME_("../database.txt") {
   std::ifstream db = openDbForReading();
   Record record;
 
   while (db >> record.key >> record.value) {
-    records[record.key] = record.value;
+    records_[record.key] = record.value;
   }
 
   db.close();
@@ -23,14 +23,14 @@ std::string Database::all() {
   Record record;
 
   std::string output = "";
-  for (const auto &pair : records) {
+  for (const auto &pair : records_) {
     record.key = pair.first;
     record.value = pair.second;
     output.append(record.toString());
   }
 
   output.append("----\n");
-  output.append(std::to_string(records.size()));
+  output.append(std::to_string(records_.size()));
 
   return output;
 }
@@ -40,7 +40,7 @@ std::string Database::find(const std::string& key) {
   record.key = key;
 
   try {
-    record.value = records.at(key);
+    record.value = records_.at(key);
   } catch (const std::out_of_range &e) {
     std::ifstream db = openDbForReading();
     bool found = false;
@@ -55,7 +55,7 @@ std::string Database::find(const std::string& key) {
     db.close();
 
     if (!found) throw std::runtime_error("error: record not found");
-    records[key] = record.value;
+    records_[key] = record.value;
   }
 
   return record.value;
@@ -79,7 +79,7 @@ std::string Database::insert(const std::string &key, const std::string &value) {
 
   std::async([this, newRecord]() { writeRecordToFile(newRecord); });
 
-  records[key] = value;
+  records_[key] = value;
 
   return "INSERT";
 }
@@ -106,8 +106,8 @@ void Database::removeRecordFromFile(const std::string& key) {
     throw std::runtime_error("error: could not remove record");
   }
 
-  std::remove(DATABASE_FILENAME.c_str());
-  std::rename("temp.txt", DATABASE_FILENAME.c_str());
+  std::remove(DATABASE_FILENAME_.c_str());
+  std::rename("temp.txt", DATABASE_FILENAME_.c_str());
 }
 
 std::string Database::remove(const std::string& key) {
@@ -117,11 +117,9 @@ std::string Database::remove(const std::string& key) {
     return "error: record not found";
   }
 
-  records.erase(key);
+  records_.erase(key);
 
   std::async([this, key]() { removeRecordFromFile(key); });
-
-  std::cout << "after async" << std::endl;
 
   return "REMOVE";
 }
@@ -148,8 +146,8 @@ void Database::updateRecordInFile(const std::string& key, const std::string& val
     throw std::runtime_error("error: could not update record");
   }
 
-  std::remove(DATABASE_FILENAME.c_str());
-  std::rename("temp.txt", DATABASE_FILENAME.c_str());
+  std::remove(DATABASE_FILENAME_.c_str());
+  std::rename("temp.txt", DATABASE_FILENAME_.c_str());
 }
 
 std::string Database::update(const std::string& key, const std::string& value) {
@@ -160,7 +158,7 @@ std::string Database::update(const std::string& key, const std::string& value) {
   }
 
   std::async([this, key, value]() { updateRecordInFile(key, value); });
-  records[key] = value;
+  records_[key] = value;
 
   return "UPDATE";
 }
@@ -184,9 +182,9 @@ std::ofstream Database::openFileForWriting(const std::string& filename) {
 }
 
 std::ifstream Database::openDbForReading() {
-  return openFileForReading(DATABASE_FILENAME);
+  return openFileForReading(DATABASE_FILENAME_);
 }
 
 std::ofstream Database::openDbForWriting() {
-  return openFileForWriting(DATABASE_FILENAME);
+  return openFileForWriting(DATABASE_FILENAME_);
 }
