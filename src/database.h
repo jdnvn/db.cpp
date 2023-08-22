@@ -8,7 +8,6 @@
 
 class Database {
 public:
-  const std::string DATABASE_FILENAME;
   Database();
   ~Database();
   std::string insert(const std::string &key, const std::string &value);
@@ -17,6 +16,7 @@ public:
   std::string remove(const std::string &key);
   std::string update(const std::string &key, const std::string &value);
 private:
+  const std::string DATABASE_FILENAME_;
   struct Record {
     std::string key;
     std::string value;

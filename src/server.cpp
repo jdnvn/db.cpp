@@ -49,6 +49,7 @@ std::string executeCommand(const std::vector<std::string>& args) {
   return "error: invalid command";
 }
 
+// https://think-async.com/Asio/asio-1.28.0/src/examples/cpp11/echo/async_tcp_echo_server.cpp
 class Session : public std::enable_shared_from_this<Session> {
 public:
   Session(tcp::socket socket, int id) : socket_(std::move(socket)), id_(id) {

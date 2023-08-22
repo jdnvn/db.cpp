@@ -6,7 +6,7 @@
 
 std::unordered_map<std::string, std::string> records_;
 
-Database::Database() : DATABASE_FILENAME("../database.txt") {
+Database::Database() : DATABASE_FILENAME_("../database.txt") {
   std::ifstream db = openDbForReading();
   Record record;
 
@@ -106,8 +106,8 @@ void Database::removeRecordFromFile(const std::string& key) {
     throw std::runtime_error("error: could not remove record");
   }
 
-  std::remove(DATABASE_FILENAME.c_str());
-  std::rename("temp.txt", DATABASE_FILENAME.c_str());
+  std::remove(DATABASE_FILENAME_.c_str());
+  std::rename("temp.txt", DATABASE_FILENAME_.c_str());
 }
 
 std::string Database::remove(const std::string& key) {
@@ -120,8 +120,6 @@ std::string Database::remove(const std::string& key) {
   records_.erase(key);
 
   std::async([this, key]() { removeRecordFromFile(key); });
-
-  std::cout << "after async" << std::endl;
 
   return "REMOVE";
 }
@@ -148,8 +146,8 @@ void Database::updateRecordInFile(const std::string& key, const std::string& val
     throw std::runtime_error("error: could not update record");
   }
 
-  std::remove(DATABASE_FILENAME.c_str());
-  std::rename("temp.txt", DATABASE_FILENAME.c_str());
+  std::remove(DATABASE_FILENAME_.c_str());
+  std::rename("temp.txt", DATABASE_FILENAME_.c_str());
 }
 
 std::string Database::update(const std::string& key, const std::string& value) {
@@ -184,9 +182,9 @@ std::ofstream Database::openFileForWriting(const std::string& filename) {
 }
 
 std::ifstream Database::openDbForReading() {
-  return openFileForReading(DATABASE_FILENAME);
+  return openFileForReading(DATABASE_FILENAME_);
 }
 
 std::ofstream Database::openDbForWriting() {
-  return openFileForWriting(DATABASE_FILENAME);
+  return openFileForWriting(DATABASE_FILENAME_);
 }
