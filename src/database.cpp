@@ -7,23 +7,16 @@
 std::unordered_map<std::string, std::string> records_;
 
 Database::Database() : DATABASE_FILENAME_("../database.txt") {
-  std::ifstream db = openDbForReading();
-  Record record;
-
-  while (db >> record.key >> record.value) {
-    records_[record.key] = record.value;
-  }
-
-  db.close();
+  populateMapFromFile();
 }
 
 Database::~Database() {}
 
 std::string Database::all() {
   Record record;
-
   std::string output = "";
-  for (const auto &pair : records_) {
+
+  for (const auto& pair : records_) {
     record.key = pair.first;
     record.value = pair.second;
     output.append(record.toString());
@@ -37,11 +30,10 @@ std::string Database::all() {
 
 std::string Database::find(const std::string& key) {
   Record record;
-  record.key = key;
 
   try {
     record.value = records_.at(key);
-  } catch (const std::out_of_range &e) {
+  } catch (const std::out_of_range& e) {
     std::ifstream db = openDbForReading();
     bool found = false;
 
@@ -61,18 +53,12 @@ std::string Database::find(const std::string& key) {
   return record.value;
 }
 
-void Database::writeRecordToFile(const Record &record) {
-  std::ofstream db = openDbForWriting();
-  db << record.toString();
-  db.close();
-}
-
-std::string Database::insert(const std::string &key, const std::string &value) {
+std::string Database::insert(const std::string& key, const std::string& value) {
   try {
     find(key);
     return "error: record already exists";
-  } catch (const std::exception &e) {
-    // intentionally swallows the error
+  } catch (const std::exception& e) {
+    // key is free, intentionally swallow the error
   }
 
   Record newRecord = {key, value};
@@ -82,6 +68,50 @@ std::string Database::insert(const std::string &key, const std::string &value) {
   records_[key] = value;
 
   return "INSERT";
+}
+
+std::string Database::remove(const std::string& key) {
+  try {
+    find(key);
+  } catch (const std::exception& e) {
+    return "error: record not found";
+  }
+
+  records_.erase(key);
+
+  std::async([this, key]() { removeRecordFromFile(key); });
+
+  return "REMOVE";
+}
+
+std::string Database::update(const std::string& key, const std::string& value) {
+  try {
+    find(key);
+  } catch (const std::exception& e) {
+    return "error: record not found";
+  }
+
+  std::async([this, key, value]() { updateRecordInFile(key, value); });
+  records_[key] = value;
+
+  return "UPDATE";
+}
+
+void Database::populateMapFromFile() {
+  std::ifstream db = openDbForReading();
+  Record record;
+
+  while (db >> record.key >> record.value) {
+    records_[record.key] = record.value;
+  }
+
+  db.close();
+}
+
+void Database::writeRecordToFile(const Record& record) {
+  std::ofstream db = openDbForWriting();
+  db << record.toString();
+  db.close();
 }
 
 void Database::removeRecordFromFile(const std::string& key) {
@@ -110,20 +140,6 @@ void Database::removeRecordFromFile(const std::string& key) {
   std::rename("temp.txt", DATABASE_FILENAME_.c_str());
 }
 
-std::string Database::remove(const std::string& key) {
-  try {
-    find(key);
-  } catch (const std::exception &e) {
-    return "error: record not found";
-  }
-
-  records_.erase(key);
-
-  std::async([this, key]() { removeRecordFromFile(key); });
-
-  return "REMOVE";
-}
-
 void Database::updateRecordInFile(const std::string& key, const std::string& value) {
   std::ifstream db = openDbForReading();
   std::ofstream tempDb = openFileForWriting("temp.txt");
@@ -150,34 +166,26 @@ void Database::updateRecordInFile(const std::string& key, const std::string& val
   std::rename("temp.txt", DATABASE_FILENAME_.c_str());
 }
 
-std::string Database::update(const std::string& key, const std::string& value) {
-  try {
-    find(key);
-  } catch (const std::exception &e) {
-    return "error: record not found";
-  }
-
-  std::async([this, key, value]() { updateRecordInFile(key, value); });
-  records_[key] = value;
-
-  return "UPDATE";
-}
-
 std::ifstream Database::openFileForReading(const std::string& filename) {
   std::ifstream inFile(filename);
+
+  // if it doesn't exist, create one
   if (!inFile) {
     std::ofstream createFile(filename);
     createFile.close();
     std::ifstream inFile(filename);
   }
+
   return inFile;
 }
 
 std::ofstream Database::openFileForWriting(const std::string& filename) {
   std::ofstream outFile(filename, std::ios::app);
+
   if (!outFile) {
     std::cerr << "error: cannot open file for writing: " << filename << "\n";
   }
+
   return outFile;
 }
 
