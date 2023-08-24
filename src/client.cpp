@@ -2,7 +2,7 @@
 #include <asio.hpp>
 #include <boost/algorithm/string.hpp>
 
-void send(std::string const &command, asio::ip::tcp::socket &socket) {
+void send(std::string const& command, asio::ip::tcp::socket& socket) {
   asio::write(socket, asio::buffer(command));
 
   char buffer[1024];
@@ -11,7 +11,7 @@ void send(std::string const &command, asio::ip::tcp::socket &socket) {
   std::cout << "\n" << std::string(buffer, bytes_received) << std::endl;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   asio::io_context io_context;
   asio::ip::tcp::socket socket(io_context);
   unsigned short port = (argc >= 2) ? std::atoi(argv[1]) : 6969;
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
       if (command == "exit") break;
       if (!command.empty()) send(command, socket);
     }
-  } catch (std::exception &e) {
+  } catch (std::exception& e) {
     std::cerr << "error connecting to server: " << e.what() << std::endl;
     return 1;
   }

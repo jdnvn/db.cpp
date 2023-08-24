@@ -88,7 +88,7 @@ private:
               std::string response = executeCommand(args);
 
               write(response.c_str());
-            } catch (const std::exception &e) {
+            } catch (const std::exception& e) {
               // respond with error message
               write(e.what());
             }
@@ -96,7 +96,7 @@ private:
         });
   }
 
-  void write(const char *response) {
+  void write(const char* response) {
     auto self(shared_from_this());
 
     std::size_t length = strlen(response);
@@ -140,7 +140,7 @@ class Server {
     }
 };
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
   try {
     asio::io_context io_context;
     unsigned short port = (argc >= 2) ? std::atoi(argv[1]) : 6969;

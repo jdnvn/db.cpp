@@ -10,11 +10,11 @@ class Database {
 public:
   Database();
   ~Database();
-  std::string insert(const std::string &key, const std::string &value);
-  std::string find(const std::string &key);
+  std::string insert(const std::string& key, const std::string& value);
+  std::string find(const std::string& key);
   std::string all();
-  std::string remove(const std::string &key);
-  std::string update(const std::string &key, const std::string &value);
+  std::string remove(const std::string& key);
+  std::string update(const std::string& key, const std::string& value);
 private:
   const std::string DATABASE_FILENAME_;
   struct Record {
@@ -26,11 +26,12 @@ private:
     }
   };
   std::unordered_map<std::string, std::string> records_;
-  void writeRecordToFile(const Record &record);
-  void updateRecordInFile(const std::string& key, const std::string& value);
+  void populateMapFromFile();
+  void writeRecordToFile(const Record& record);
   void removeRecordFromFile(const std::string& key);
-  std::ifstream openFileForReading(const std::string &filename);
-  std::ofstream openFileForWriting(const std::string &filename);
+  void updateRecordInFile(const std::string& key, const std::string& value);
+  std::ifstream openFileForReading(const std::string& filename);
+  std::ofstream openFileForWriting(const std::string& filename);
   std::ifstream openDbForReading();
   std::ofstream openDbForWriting();
 };
