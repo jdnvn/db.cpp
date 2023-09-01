@@ -14,7 +14,7 @@ void send(std::string const& command, asio::ip::tcp::socket& socket) {
 int main(int argc, char** argv) {
   asio::io_context io_context;
   asio::ip::tcp::socket socket(io_context);
-  unsigned short port = (argc >= 2) ? std::atoi(argv[1]) : 6969;
+  unsigned short port = (argc >= 2) ? std::atoi(argv[1]) : 1337;
 
   try {
     asio::ip::tcp::endpoint endpoint(asio::ip::address::from_string("127.0.0.1"), port);
