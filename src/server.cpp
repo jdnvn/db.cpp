@@ -120,6 +120,19 @@ class Server {
   public:
     Server(asio::io_context& io_context, unsigned short port)
       : acceptor_(io_context, tcp::endpoint(tcp::v4(), port)) {
+      std::cout << R"(
+                     ,%%,
+        ______________)(______________
+       /             (__)             \
+      /________________________________\
+      [________________________________]
+         \ \  / /            \ \  / /
+          \ \/ /              \ \/ /
+          _\/ /________________\ \/_
+         [_/o/__________________\o\_]
+          / /\ \              / /\ \
+         lc/  \_\            /_/  \_\
+      )" << std::endl;
       std::cout << "smalltable server listening on port " << port << std::endl;
       accept();
     }
@@ -143,7 +156,7 @@ class Server {
 int main(int argc, char** argv) {
   try {
     asio::io_context io_context;
-    unsigned short port = (argc >= 2) ? std::atoi(argv[1]) : 6969;
+    unsigned short port = (argc >= 2) ? std::atoi(argv[1]) : 1337;
 
     Server server(io_context, port);
 
