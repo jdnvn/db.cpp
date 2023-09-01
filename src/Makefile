@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -I/Users/joey/Downloads/asio-1.28.0/include
+CXXFLAGS = -std=c++11 -I../third_party/asio-1.28.0/include
 
 SERVER_SOURCE = server.cpp
 CLIENT_SOURCE = client.cpp
